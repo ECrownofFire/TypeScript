@@ -5546,6 +5546,10 @@ namespace ts {
         return node.kind === SyntaxKind.MappedType;
     }
 
+    export function isHalfRangeTypeNode(node: Node): node is HalfRangeTypeNode {
+        return node.kind === SyntaxKind.HalfRangeType;
+    }
+
     export function isLiteralTypeNode(node: Node): node is LiteralTypeNode {
         return node.kind === SyntaxKind.LiteralType;
     }

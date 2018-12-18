@@ -202,6 +202,9 @@ namespace ts {
                     visitNode(cbNode, (<MappedTypeNode>node).typeParameter) ||
                     visitNode(cbNode, (<MappedTypeNode>node).questionToken) ||
                     visitNode(cbNode, (<MappedTypeNode>node).type);
+            case SyntaxKind.HalfRangeType:
+                return visitNode(cbNode, (<HalfRangeTypeNode>node).operator) ||
+                    visitNode(cbNode, (<HalfRangeTypeNode>node).basis);
             case SyntaxKind.LiteralType:
                 return visitNode(cbNode, (<LiteralTypeNode>node).literal);
             case SyntaxKind.ObjectBindingPattern:
@@ -2826,6 +2829,42 @@ namespace ts {
             return finishNode(node);
         }
 
+        function parseParenthesizedOrHalfRangeType(): TypeNode {
+            if (lookAhead(isStartOfHalfRangeType)) {
+                return tryParse(parseHalfRangeType) || parseParenthesizedType();
+            }
+            return parseParenthesizedType();
+        }
+
+        function parseHalfRangeType(): TypeNode | undefined {
+            const node = <HalfRangeTypeNode>createNode(SyntaxKind.HalfRangeType);
+            parseExpected(SyntaxKind.OpenParenToken);
+            reScanGreaterToken();
+            node.operator = parseTokenNode<HalfRangeTypeNode["operator"]>();
+
+            let unaryMinus: PrefixUnaryExpression | undefined;
+            if (token() === SyntaxKind.MinusToken) {
+                unaryMinus = <PrefixUnaryExpression>createNode(SyntaxKind.PrefixUnaryExpression);
+                unaryMinus.operator = SyntaxKind.MinusToken;
+                nextToken();
+            }
+
+            if (token() !== SyntaxKind.NumericLiteral) {
+                return undefined;
+            }
+            let basis: NumericLiteral | PrefixUnaryExpression = <NumericLiteral>parseLiteralNode();
+
+            if (unaryMinus !== undefined) {
+                unaryMinus.operand = basis;
+                finishNode(unaryMinus);
+                basis = unaryMinus;
+            }
+
+            node.basis = basis;
+            parseExpected(SyntaxKind.CloseParenToken);
+            return finishNode(node);
+        }
+
         function parseParenthesizedType(): TypeNode {
             const node = <ParenthesizedTypeNode>createNode(SyntaxKind.ParenthesizedType);
             parseExpected(SyntaxKind.OpenParenToken);
@@ -2946,7 +2985,7 @@ namespace ts {
                 case SyntaxKind.OpenBracketToken:
                     return parseTupleType();
                 case SyntaxKind.OpenParenToken:
-                    return parseParenthesizedType();
+                    return parseParenthesizedOrHalfRangeType();
                 case SyntaxKind.ImportKeyword:
                     return parseImportType();
                 default:
@@ -2996,7 +3035,7 @@ namespace ts {
                 case SyntaxKind.OpenParenToken:
                     // Only consider '(' the start of a type if followed by ')', '...', an identifier, a modifier,
                     // or something that starts a type. We don't want to consider things like '(1)' a type.
-                    return !inStartOfParameter && lookAhead(isStartOfParenthesizedOrFunctionType);
+                    return !inStartOfParameter && (lookAhead(isStartOfHalfRangeType) || lookAhead(isStartOfParenthesizedOrFunctionType));
                 default:
                     return isIdentifier();
             }
@@ -3005,6 +3044,20 @@ namespace ts {
         function isStartOfParenthesizedOrFunctionType() {
             nextToken();
             return token() === SyntaxKind.CloseParenToken || isStartOfParameter(/*isJSDocParameter*/ false) || isStartOfType();
+        }
+
+        function isStartOfHalfRangeType(): boolean {
+            nextToken();
+            switch (token()) {
+                case SyntaxKind.LessThanToken:
+                case SyntaxKind.LessThanEqualsToken:
+                    return true;
+                case SyntaxKind.GreaterThanToken:
+                    reScanGreaterToken();
+                    return token() === SyntaxKind.GreaterThanToken || token() === SyntaxKind.GreaterThanEqualsToken;
+                default:
+                    return false;
+            }
         }
 
         function parsePostfixTypeOrHigher(): TypeNode {

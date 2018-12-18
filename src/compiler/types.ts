@@ -317,6 +317,7 @@ namespace ts {
         IndexedAccessType,
         MappedType,
         LiteralType,
+        HalfRangeType,
         ImportType,
         // Binding patterns
         ObjectBindingPattern,
@@ -723,6 +724,10 @@ namespace ts {
     export type AwaitKeywordToken = Token<SyntaxKind.AwaitKeyword>;
     export type PlusToken = Token<SyntaxKind.PlusToken>;
     export type MinusToken = Token<SyntaxKind.MinusToken>;
+    export type GreaterThanToken = Token<SyntaxKind.GreaterThanToken>;
+    export type GreaterThanEqualsToken = Token<SyntaxKind.GreaterThanEqualsToken>;
+    export type LessThanToken = Token<SyntaxKind.LessThanToken>;
+    export type LessThanEqualsToken = Token<SyntaxKind.LessThanEqualsToken>;
 
     export type Modifier
         = Token<SyntaxKind.AbstractKeyword>
@@ -1259,6 +1264,12 @@ namespace ts {
     export interface LiteralTypeNode extends TypeNode {
         kind: SyntaxKind.LiteralType;
         literal: BooleanLiteral | LiteralExpression | PrefixUnaryExpression;
+    }
+
+    export interface HalfRangeTypeNode extends TypeNode {
+        kind: SyntaxKind.HalfRangeType;
+        operator: LessThanToken | LessThanEqualsToken | GreaterThanToken | GreaterThanEqualsToken;
+        basis: NumericLiteral | PrefixUnaryExpression;
     }
 
     export interface StringLiteral extends LiteralExpression {
@@ -3827,17 +3838,18 @@ namespace ts {
         Object                  = 1 << 19,  // Object type
         Union                   = 1 << 20,  // Union (T | U)
         Intersection            = 1 << 21,  // Intersection (T & U)
-        Index                   = 1 << 22,  // keyof T
-        IndexedAccess           = 1 << 23,  // T[K]
-        Conditional             = 1 << 24,  // T extends U ? X : Y
-        Substitution            = 1 << 25,  // Type parameter substitution
-        NonPrimitive            = 1 << 26,  // intrinsic object type
+        Range                   = 1 << 22,  // Range type (< N), (>= N), etc.
+        Index                   = 1 << 23,  // keyof T
+        IndexedAccess           = 1 << 24,  // T[K]
+        Conditional             = 1 << 25,  // T extends U ? X : Y
+        Substitution            = 1 << 26,  // Type parameter substitution
+        NonPrimitive            = 1 << 27,  // intrinsic object type
         /* @internal */
-        ContainsWideningType    = 1 << 27,  // Type is or contains undefined or null widening type
+        ContainsWideningType    = 1 << 28,  // Type is or contains undefined or null widening type
         /* @internal */
-        ContainsObjectLiteral   = 1 << 28,  // Type is or contains object literal type
+        ContainsObjectLiteral   = 1 << 29,  // Type is or contains object literal type
         /* @internal */
-        ContainsAnyFunctionType = 1 << 29,  // Type is or contains the anyFunctionType
+        ContainsAnyFunctionType = 1 << 30,  // Type is or contains the anyFunctionType
 
         /* @internal */
         AnyOrUnknown = Any | Unknown,
@@ -3856,7 +3868,7 @@ namespace ts {
         /* @internal */
         Primitive = String | Number | BigInt | Boolean | Enum | EnumLiteral | ESSymbol | Void | Undefined | Null | Literal | UniqueESSymbol,
         StringLike = String | StringLiteral,
-        NumberLike = Number | NumberLiteral | Enum,
+        NumberLike = Number | NumberLiteral | Enum | Range,
         BigIntLike = BigInt | BigIntLiteral,
         BooleanLike = Boolean | BooleanLiteral,
         EnumLike = Enum | EnumLiteral,
@@ -3953,6 +3965,13 @@ namespace ts {
 
     export interface BigIntLiteralType extends LiteralType {
         value: PseudoBigInt;
+    }
+
+    export interface RangeType extends Type {
+        min?: NumberLiteralType;
+        minOpen?: boolean;
+        max?: NumberLiteralType;
+        maxOpen?: boolean;
     }
 
     // Enum types (TypeFlags.Enum)

@@ -430,6 +430,11 @@ namespace ts {
                     visitNode((<MappedTypeNode>node).questionToken, tokenVisitor, isToken),
                     visitNode((<MappedTypeNode>node).type, visitor, isTypeNode));
 
+            case SyntaxKind.HalfRangeType:
+                return updateHalfRangeTypeNode(<HalfRangeTypeNode>node,
+                    visitNode((<HalfRangeTypeNode>node).operator, tokenVisitor, isToken),
+                    visitNode((<HalfRangeTypeNode>node).basis, visitor, isExpression));
+
             case SyntaxKind.LiteralType:
                 return updateLiteralTypeNode(<LiteralTypeNode>node,
                     visitNode((<LiteralTypeNode>node).literal, visitor, isExpression));
