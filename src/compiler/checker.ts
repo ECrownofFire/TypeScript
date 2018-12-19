@@ -13469,13 +13469,15 @@ namespace ts {
 
         // Returns the String, Number, Boolean, StringLiteral, NumberLiteral, BooleanLiteral, Void, Undefined, or Null
         // flags for the string, number, boolean, "", 0, false, void, undefined, or null types respectively. Returns
-        // no flags for all other types (including non-falsy literal types).
+        // the Range flag for ranges if they can possibly contain 0, and no flags for all other types (including
+        // non-falsy literal types).
         function getFalsyFlags(type: Type): TypeFlags {
             return type.flags & TypeFlags.Union ? getFalsyFlagsOfTypes((<UnionType>type).types) :
                 type.flags & TypeFlags.StringLiteral ? (<LiteralType>type).value === "" ? TypeFlags.StringLiteral : 0 :
                 type.flags & TypeFlags.NumberLiteral ? (<LiteralType>type).value === 0 ? TypeFlags.NumberLiteral : 0 :
                 type.flags & TypeFlags.BigIntLiteral ? isZeroBigInt(<BigIntLiteralType>type) ? TypeFlags.BigIntLiteral : 0 :
                 type.flags & TypeFlags.BooleanLiteral ? (type === falseType || type === regularFalseType) ? TypeFlags.BooleanLiteral : 0 :
+                type.flags & TypeFlags.Range ? isValueInRange(<RangeType>type, 0) ? TypeFlags.Range : 0 :
                 type.flags & TypeFlags.PossiblyFalsy;
         }
 
@@ -14928,6 +14930,12 @@ namespace ts {
             }
             if (flags & (TypeFlags.Number | TypeFlags.Enum)) {
                 return strictNullChecks ? TypeFacts.NumberStrictFacts : TypeFacts.NumberFacts;
+            }
+            if (flags & TypeFlags.Range) {
+                const maybeZero = isValueInRange(<RangeType>type, 0);
+                return strictNullChecks ?
+                    maybeZero ? TypeFacts.NumberStrictFacts : TypeFacts.NonZeroNumberStrictFacts :
+                    maybeZero ? TypeFacts.NumberFacts : TypeFacts.NonZeroNumberFacts;
             }
             if (flags & TypeFlags.NumberLiteral) {
                 const isZero = (<LiteralType>type).value === 0;
