@@ -1,0 +1,49 @@
+=== tests/cases/compiler/rangeTypeAddition.ts ===
+declare var a: (> 1);
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+
+declare var b: (> 2);
+>b : Symbol(b, Decl(rangeTypeAddition.ts, 1, 11))
+
+declare var c: (>= 4)
+>c : Symbol(c, Decl(rangeTypeAddition.ts, 2, 11))
+
+// range + range
+var d: (> 3) = a + b;
+>d : Symbol(d, Decl(rangeTypeAddition.ts, 5, 3))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+>b : Symbol(b, Decl(rangeTypeAddition.ts, 1, 11))
+
+var e: (>= 5) = a + c;
+>e : Symbol(e, Decl(rangeTypeAddition.ts, 6, 3))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+>c : Symbol(c, Decl(rangeTypeAddition.ts, 2, 11))
+
+// range + literal
+var f: (> 3) = a + 2;
+>f : Symbol(f, Decl(rangeTypeAddition.ts, 9, 3))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+
+var g: (>= 8) = c + 4;
+>g : Symbol(g, Decl(rangeTypeAddition.ts, 10, 3))
+>c : Symbol(c, Decl(rangeTypeAddition.ts, 2, 11))
+
+// literal + range
+var h: (> 3) = 2 + a;
+>h : Symbol(h, Decl(rangeTypeAddition.ts, 13, 3))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+
+var i: (>= 8) = 4 + c;
+>i : Symbol(i, Decl(rangeTypeAddition.ts, 14, 3))
+>c : Symbol(c, Decl(rangeTypeAddition.ts, 2, 11))
+
+// +=
+var j: (> 2) = a += a;
+>j : Symbol(j, Decl(rangeTypeAddition.ts, 17, 3))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+>a : Symbol(a, Decl(rangeTypeAddition.ts, 0, 11))
+
+var k: (> 4) = b += 2;
+>k : Symbol(k, Decl(rangeTypeAddition.ts, 18, 3))
+>b : Symbol(b, Decl(rangeTypeAddition.ts, 1, 11))
+

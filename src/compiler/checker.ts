@@ -22364,6 +22364,43 @@ namespace ts {
             return (target.flags & TypeFlags.Nullable) !== 0 || isTypeComparableTo(source, target);
         }
 
+        function addValueToRange(range: RangeType, value: number, operator: SyntaxKind) {
+            const type = <RangeType>createType(TypeFlags.Range);
+            if (range.min) {
+                type.min = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
+                    <NumberLiteralType>getLiteralType(range.min.value + value) :
+                    <NumberLiteralType>getLiteralType(range.min.value - value);
+            }
+            if (range.max) {
+                type.max = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
+                    <NumberLiteralType>getLiteralType(range.max.value + value) :
+                    <NumberLiteralType>getLiteralType(range.max.value - value);
+            }
+            type.minOpen = range.minOpen;
+            type.maxOpen = range.maxOpen;
+            return type;
+        }
+
+        function addRanges(left: RangeType, right: RangeType, operator: SyntaxKind) {
+            if (!(left.min && right.min) && !(left.max && right.max)) {
+                return numberType; // (> a) + (< b) can be any number
+            }
+            const type = <RangeType>createType(TypeFlags.Range);
+            if (left.min && right.min) {
+                type.min = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
+                    <NumberLiteralType>getLiteralType(left.min.value + right.min.value) :
+                    <NumberLiteralType>getLiteralType(left.min.value - right.min.value);
+            }
+            if (left.max && right.max) {
+                type.max = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
+                    <NumberLiteralType>getLiteralType(left.max.value + right.max.value) :
+                    <NumberLiteralType>getLiteralType(left.max.value - right.max.value);
+            }
+            type.minOpen = left.minOpen && right.minOpen;
+            type.maxOpen = left.maxOpen && right.maxOpen;
+            return type;
+        }
+
         function checkBinaryExpression(node: BinaryExpression, checkMode?: CheckMode) {
             if (isInJSFile(node) && getAssignedExpandoInitializer(node)) {
                 return checkExpression(node.right, checkMode);
@@ -22466,7 +22503,16 @@ namespace ts {
                     }
 
                     let resultType: Type | undefined;
-                    if (isTypeAssignableToKind(leftType, TypeFlags.NumberLike, /*strict*/ true) && isTypeAssignableToKind(rightType, TypeFlags.NumberLike, /*strict*/ true)) {
+                    if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.Range) {
+                        resultType = addRanges(<RangeType>leftType, <RangeType>rightType, operator);
+                    }
+                    else if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.NumberLiteral) {
+                        resultType = addValueToRange(<RangeType>leftType, (<NumberLiteralType>rightType).value, operator);
+                    }
+                    else if (leftType.flags & TypeFlags.NumberLiteral && rightType.flags & TypeFlags.Range && operator === SyntaxKind.PlusToken) {
+                        resultType = addValueToRange(<RangeType>rightType, (<NumberLiteralType>leftType).value, operator);
+                    }
+                    else if (isTypeAssignableToKind(leftType, TypeFlags.NumberLike, /*strict*/ true) && isTypeAssignableToKind(rightType, TypeFlags.NumberLike, /*strict*/ true)) {
                         // Operands of an enum type are treated as having the primitive type Number.
                         // If both operands are of the Number primitive type, the result is of the Number primitive type.
                         resultType = numberType;

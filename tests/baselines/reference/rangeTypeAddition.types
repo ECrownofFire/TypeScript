@@ -1,0 +1,62 @@
+=== tests/cases/compiler/rangeTypeAddition.ts ===
+declare var a: (> 1);
+>a : (> 1)
+
+declare var b: (> 2);
+>b : (> 2)
+
+declare var c: (>= 4)
+>c : (>= 4)
+
+// range + range
+var d: (> 3) = a + b;
+>d : (> 3)
+>a + b : (> 3)
+>a : (> 1)
+>b : (> 2)
+
+var e: (>= 5) = a + c;
+>e : (>= 5)
+>a + c : (>= 5)
+>a : (> 1)
+>c : (>= 4)
+
+// range + literal
+var f: (> 3) = a + 2;
+>f : (> 3)
+>a + 2 : (> 3)
+>a : (> 1)
+>2 : 2
+
+var g: (>= 8) = c + 4;
+>g : (>= 8)
+>c + 4 : (>= 8)
+>c : (>= 4)
+>4 : 4
+
+// literal + range
+var h: (> 3) = 2 + a;
+>h : (> 3)
+>2 + a : (> 3)
+>2 : 2
+>a : (> 1)
+
+var i: (>= 8) = 4 + c;
+>i : (>= 8)
+>4 + c : (>= 8)
+>4 : 4
+>c : (>= 4)
+
+// +=
+var j: (> 2) = a += a;
+>j : (> 2)
+>a += a : (> 2)
+>a : (> 1)
+>a : (> 1)
+
+var k: (> 4) = b += 2;
+>k : (> 4)
+>b += 2 : (> 4)
+>b : (> 2)
+>2 : 2
+
