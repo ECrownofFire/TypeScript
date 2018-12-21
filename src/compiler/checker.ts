@@ -3451,26 +3451,27 @@ namespace ts {
                     return typeToTypeNodeHelper((<SubstitutionType>type).typeVariable, context);
                 }
                 if (type.flags & TypeFlags.Range) {
-                    if ((<RangeType>type).min && !(<RangeType>type).max) {
-                        const operator = (<RangeType>type).minOpen ? createToken(SyntaxKind.GreaterThanToken) : createToken(SyntaxKind.GreaterThanEqualsToken);
-                        const basis = createLiteral((<RangeType>type).min!.value);
+                    const range = <RangeType>type;
+                    if (range.min && !range.max) {
+                        const operator = range.minOpen ? createToken(SyntaxKind.GreaterThanToken) : createToken(SyntaxKind.GreaterThanEqualsToken);
+                        const basis = createLiteral(range.min.value);
                         return createHalfRangeTypeNode(operator, basis);
                     }
-                    else if (!(<RangeType>type).min && (<RangeType>type).max) {
-                        const operator = (<RangeType>type).maxOpen ? createToken(SyntaxKind.LessThanToken) : createToken(SyntaxKind.LessThanEqualsToken);
-                        const basis = createLiteral((<RangeType>type).max!.value);
+                    else if (!range.min && range.max) {
+                        const operator = range.maxOpen ? createToken(SyntaxKind.LessThanToken) : createToken(SyntaxKind.LessThanEqualsToken);
+                        const basis = createLiteral(range.max.value);
                         return createHalfRangeTypeNode(operator, basis);
                     }
-                    else if ((<RangeType>type).min && (<RangeType>type).max) {
+                    else if (range.min && range.max) {
                         const min = <RangeType>createType(TypeFlags.Range);
-                        min.min = (<RangeType>type).min;
-                        min.minOpen = (<RangeType>type).minOpen;
+                        min.min = range.min;
+                        min.minOpen = range.minOpen;
                         const max = <RangeType>createType(TypeFlags.Range);
-                        max.max = (<RangeType>type).max;
-                        max.maxOpen = (<RangeType>type).maxOpen;
+                        max.max = range.max;
+                        max.maxOpen = range.maxOpen;
                         return createIntersectionTypeNode([typeToTypeNodeHelper(min, context), typeToTypeNodeHelper(max, context)]);
                     }
-                    else if (!(<RangeType>type).min && !(<RangeType>type).max) {
+                    else if (!range.min && !range.max) {
                         return createKeywordTypeNode(SyntaxKind.NumberKeyword);
                     }
                 }
@@ -11929,7 +11930,7 @@ namespace ts {
                     }
                 }
                 if (flags & TypeFlags.Range) {
-                    // assert types
+                    // just to reduce line noise
                     const src = <RangeType>source;
                     const tgt = <RangeType>target;
                     if (src.min === tgt.min && src.minOpen === tgt.minOpen
@@ -22364,41 +22365,162 @@ namespace ts {
             return (target.flags & TypeFlags.Nullable) !== 0 || isTypeComparableTo(source, target);
         }
 
-        function addValueToRange(range: RangeType, value: number, operator: SyntaxKind) {
+        function finishRange(minN: number, maxN: number, minOpen?: boolean, maxOpen?: boolean): Type {
+            const min = isFinite(minN) ? minN : undefined;
+            const max = isFinite(maxN) ? maxN : undefined;
+            if (min === undefined && max === undefined) {
+                return numberType;
+            }
             const type = <RangeType>createType(TypeFlags.Range);
-            if (range.min) {
-                type.min = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
-                    <NumberLiteralType>getLiteralType(range.min.value + value) :
-                    <NumberLiteralType>getLiteralType(range.min.value - value);
-            }
-            if (range.max) {
-                type.max = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
-                    <NumberLiteralType>getLiteralType(range.max.value + value) :
-                    <NumberLiteralType>getLiteralType(range.max.value - value);
-            }
-            type.minOpen = range.minOpen;
-            type.maxOpen = range.maxOpen;
+            type.min = min === undefined ? undefined : <NumberLiteralType>getLiteralType(min);
+            type.max = max === undefined ? undefined : <NumberLiteralType>getLiteralType(max);
+            type.minOpen = minOpen;
+            type.maxOpen = maxOpen;
             return type;
         }
 
-        function addRanges(left: RangeType, right: RangeType, operator: SyntaxKind) {
-            if (!(left.min && right.min) && !(left.max && right.max)) {
-                return numberType; // (> a) + (< b) can be any number
+        function applyOperatorToValueAndRange(value: number, range: RangeType, operator: SyntaxKind): Type {
+            const min = range.min ? range.min.value : -Infinity;
+            const max = range.max ? range.max.value : Infinity;
+            switch (operator) {
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.PlusEqualsToken:
+                case SyntaxKind.AsteriskToken:
+                case SyntaxKind.AsteriskEqualsToken:
+                    return applyOperatorToRangeAndValue(range, value, operator);
+                case SyntaxKind.MinusToken:
+                case SyntaxKind.MinusEqualsToken:
+                    return finishRange(value - max, value - min, range.maxOpen, range.minOpen);
+                case SyntaxKind.SlashToken:
+                case SyntaxKind.SlashEqualsToken:
+                    if (isValueInRange(range, 0)) {
+                        return numberType;
+                    }
+                    else {
+                        return finishRange(value / max, value / min, range.maxOpen, range.minOpen);
+                    }
+                default:
+                    return numberType;
             }
-            const type = <RangeType>createType(TypeFlags.Range);
-            if (left.min && right.min) {
-                type.min = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
-                    <NumberLiteralType>getLiteralType(left.min.value + right.min.value) :
-                    <NumberLiteralType>getLiteralType(left.min.value - right.min.value);
+        }
+
+        function applyOperatorToRangeAndValue(range: RangeType, value: number, operator: SyntaxKind): Type {
+            let min = range.min ? range.min.value : -Infinity;
+            let max = range.max ? range.max.value : Infinity;
+            switch (operator) {
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.PlusEqualsToken:
+                    min += value;
+                    max += value;
+                    break;
+                case SyntaxKind.MinusToken:
+                case SyntaxKind.MinusEqualsToken:
+                    min -= value;
+                    max -= value;
+                    break;
+                case SyntaxKind.AsteriskToken:
+                case SyntaxKind.AsteriskEqualsToken:
+                    min *= value;
+                    max *= value;
+                    break;
+                case SyntaxKind.SlashToken:
+                case SyntaxKind.SlashEqualsToken:
+                    if (value === 0) return numberType;
+                    min /= value;
+                    max /= value;
+                    break;
+                default:
+                    return numberType;
             }
-            if (left.max && right.max) {
-                type.max = operator === SyntaxKind.PlusToken || operator === SyntaxKind.PlusEqualsToken ?
-                    <NumberLiteralType>getLiteralType(left.max.value + right.max.value) :
-                    <NumberLiteralType>getLiteralType(left.max.value - right.max.value);
+            return finishRange(min, max, range.minOpen, range.maxOpen);
+        }
+
+        function applyOperatorToRanges(left: RangeType, right: RangeType, operator: SyntaxKind): Type {
+            let min;
+            let max;
+            let minOpen: boolean;
+            let maxOpen: boolean;
+            const leftMin = left.min ? left.min.value : -Infinity;
+            const leftMax = left.max ? left.max.value : Infinity;
+            const rightMin = right.min ? right.min.value : -Infinity;
+            const rightMax = right.max ? right.max.value : Infinity;
+            switch (operator) {
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.PlusEqualsToken:
+                    min = leftMin + rightMin;
+                    max = leftMax + rightMax;
+                    minOpen = !!(left.minOpen && right.minOpen);
+                    maxOpen = !!(left.maxOpen && right.maxOpen);
+                    break;
+                case SyntaxKind.MinusToken:
+                case SyntaxKind.MinusEqualsToken:
+                    min = leftMin - rightMax;
+                    max = leftMax - rightMin;
+                    minOpen = !!(left.minOpen || right.maxOpen);
+                    maxOpen = !!(left.maxOpen || right.minOpen);
+                    break;
+                case SyntaxKind.AsteriskToken:
+                case SyntaxKind.AsteriskEqualsToken:
+                    let ac = leftMin * rightMin;
+                    let ad = leftMin * rightMax;
+                    let bc = leftMax * rightMin;
+                    let bd = leftMax * rightMax;
+                    ac = isNaN(ac) ? 0 : ac;
+                    ad = isNaN(ad) ? 0 : ad;
+                    bc = isNaN(bc) ? 0 : bc;
+                    bd = isNaN(bd) ? 0 : bd;
+                    // throwing away NaNs here because it only appears in 0 * Inf
+                    // and for this purpose, we want to consider 0 * Inf = 0
+                    min = Math.min(ac, ad, bc, bd);
+                    max = Math.max(ac, ad, bc, bd);
+                    minOpen = true;
+                    maxOpen = true;
+                    if (!left.minOpen && !right.minOpen) {
+                        if (min === ac) minOpen = false;
+                        if (max === ac) maxOpen = false;
+                    }
+                    if (!left.minOpen && !right.maxOpen) {
+                        if (min === ad) minOpen = false;
+                        if (max === ad) maxOpen = false;
+                    }
+                    if (!left.maxOpen && !right.minOpen) {
+                        if (min === bc) minOpen = false;
+                        if (max === bc) maxOpen = false;
+                    }
+                    if (!left.maxOpen && !right.maxOpen) {
+                        if (min === bd) minOpen = false;
+                        if (max === bd) maxOpen = false;
+                    }
+                    break;
+                case SyntaxKind.SlashToken:
+                case SyntaxKind.SlashEqualsToken:
+                    if (isValueInRange(right, 0)) {
+                        return numberType;
+                    }
+                    else {
+                        const rightReciprocal = applyOperatorToValueAndRange(1, right, operator);
+                        return applyOperatorToRanges(left, rightReciprocal, SyntaxKind.AsteriskToken);
+                    }
+                default:
+                    return numberType;
             }
-            type.minOpen = left.minOpen && right.minOpen;
-            type.maxOpen = left.maxOpen && right.maxOpen;
-            return type;
+            return finishRange(min, max, minOpen, maxOpen);
+        }
+
+        function applyOperatorToRange(left: Type, right: Type, operator: SyntaxKind) {
+            if (left.flags & TypeFlags.Range && right.flags & TypeFlags.Range) {
+                return applyOperatorToRanges(<RangeType>left, <RangeType>right, operator);
+            }
+            else if (left.flags & TypeFlags.Range && right.flags & TypeFlags.NumberLiteral) {
+                return applyOperatorToRangeAndValue(<RangeType>left, (<NumberLiteralType>right).value, operator);
+            }
+            else if (left.flags & TypeFlags.NumberLiteral && right.flags & TypeFlags.Range) {
+                return applyOperatorToValueAndRange((<NumberLiteralType>left).value, <RangeType>right, operator);
+            }
+            else {
+                Debug.fail("Should only be called with at least one range and at most one number literal.");
+                return numberType;
+            }
         }
 
         function checkBinaryExpression(node: BinaryExpression, checkMode?: CheckMode) {
@@ -22466,8 +22588,14 @@ namespace ts {
                         const leftOk = checkArithmeticOperandType(left, leftType, Diagnostics.The_left_hand_side_of_an_arithmetic_operation_must_be_of_type_any_number_bigint_or_an_enum_type);
                         const rightOk = checkArithmeticOperandType(right, rightType, Diagnostics.The_right_hand_side_of_an_arithmetic_operation_must_be_of_type_any_number_bigint_or_an_enum_type);
                         let resultType: Type;
+                        // if we're dealing with a range, handle it
+                        if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.Range
+                            || leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.NumberLiteral
+                            || leftType.flags & TypeFlags.NumberLiteral && rightType.flags & TypeFlags.Range) {
+                            resultType = applyOperatorToRange(leftType, rightType, operator);
+                        }
                         // If both are any or unknown, allow operation; assume it will resolve to number
-                        if ((isTypeAssignableToKind(leftType, TypeFlags.AnyOrUnknown) && isTypeAssignableToKind(rightType, TypeFlags.AnyOrUnknown)) ||
+                        else if ((isTypeAssignableToKind(leftType, TypeFlags.AnyOrUnknown) && isTypeAssignableToKind(rightType, TypeFlags.AnyOrUnknown)) ||
                             // Or, if neither could be bigint, implicit coercion results in a number result
                             !(maybeTypeOfKind(leftType, TypeFlags.BigIntLike) || maybeTypeOfKind(rightType, TypeFlags.BigIntLike))
                         ) {
@@ -22503,14 +22631,10 @@ namespace ts {
                     }
 
                     let resultType: Type | undefined;
-                    if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.Range) {
-                        resultType = addRanges(<RangeType>leftType, <RangeType>rightType, operator);
-                    }
-                    else if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.NumberLiteral) {
-                        resultType = addValueToRange(<RangeType>leftType, (<NumberLiteralType>rightType).value, operator);
-                    }
-                    else if (leftType.flags & TypeFlags.NumberLiteral && rightType.flags & TypeFlags.Range && operator === SyntaxKind.PlusToken) {
-                        resultType = addValueToRange(<RangeType>rightType, (<NumberLiteralType>leftType).value, operator);
+                    if (leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.Range
+                        || leftType.flags & TypeFlags.Range && rightType.flags & TypeFlags.NumberLiteral
+                        || leftType.flags & TypeFlags.NumberLiteral && rightType.flags & TypeFlags.Range) {
+                        resultType = applyOperatorToRange(leftType, rightType, operator);
                     }
                     else if (isTypeAssignableToKind(leftType, TypeFlags.NumberLike, /*strict*/ true) && isTypeAssignableToKind(rightType, TypeFlags.NumberLike, /*strict*/ true)) {
                         // Operands of an enum type are treated as having the primitive type Number.

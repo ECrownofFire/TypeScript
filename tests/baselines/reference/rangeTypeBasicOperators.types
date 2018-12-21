@@ -12,8 +12,8 @@ let a1 = a + b;
 >b : (<= 3)
 
 let a2 = a - b;
->a2 : number
->a - b : number
+>a2 : (> 39)
+>a - b : (> 39)
 >a : (> 42)
 >b : (<= 3)
 

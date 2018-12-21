@@ -1,0 +1,305 @@
+=== tests/cases/compiler/rangeTypeOperatorTypes.ts ===
+declare var a: (> 2);
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+declare var b: (>= 3);
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+declare var c: (< 5);
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+declare var d: (<= 7);
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let e1: (>= 5) = a + b;
+>e1 : Symbol(e1, Decl(rangeTypeOperatorTypes.ts, 5, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let e2: (>= 5) = b + a;
+>e2 : Symbol(e2, Decl(rangeTypeOperatorTypes.ts, 6, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let e3: number = a + c;
+>e3 : Symbol(e3, Decl(rangeTypeOperatorTypes.ts, 7, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let e4: number = a + d;
+>e4 : Symbol(e4, Decl(rangeTypeOperatorTypes.ts, 8, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let e5: number = b + c;
+>e5 : Symbol(e5, Decl(rangeTypeOperatorTypes.ts, 9, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let e6: number = b + d;
+>e6 : Symbol(e6, Decl(rangeTypeOperatorTypes.ts, 10, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let e7: (> 8) = a + 6;
+>e7 : Symbol(e7, Decl(rangeTypeOperatorTypes.ts, 12, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let e8: (> 8) = 6 + a;
+>e8 : Symbol(e8, Decl(rangeTypeOperatorTypes.ts, 13, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let e9: (< 7) = c + 2;
+>e9 : Symbol(e9, Decl(rangeTypeOperatorTypes.ts, 14, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let e10: (< 7) = 2 + c;
+>e10 : Symbol(e10, Decl(rangeTypeOperatorTypes.ts, 15, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+
+let f1: number = a - a;
+>f1 : Symbol(f1, Decl(rangeTypeOperatorTypes.ts, 18, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f2: number = a - b;
+>f2 : Symbol(f2, Decl(rangeTypeOperatorTypes.ts, 19, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let f3: (> -3) = a - c;
+>f3 : Symbol(f3, Decl(rangeTypeOperatorTypes.ts, 20, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let f4: (> -5) = a - d;
+>f4 : Symbol(f4, Decl(rangeTypeOperatorTypes.ts, 21, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let f5: number = b - a;
+>f5 : Symbol(f5, Decl(rangeTypeOperatorTypes.ts, 22, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f6: number = b - b;
+>f6 : Symbol(f6, Decl(rangeTypeOperatorTypes.ts, 23, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let f7: (> -2) = b - c;
+>f7 : Symbol(f7, Decl(rangeTypeOperatorTypes.ts, 24, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let f8: (>= -4) = b - d;
+>f8 : Symbol(f8, Decl(rangeTypeOperatorTypes.ts, 25, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let f9: (< 3) = c - a;
+>f9 : Symbol(f9, Decl(rangeTypeOperatorTypes.ts, 26, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f10: (< 2) = c - b;
+>f10 : Symbol(f10, Decl(rangeTypeOperatorTypes.ts, 27, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let f11: number = c - c;
+>f11 : Symbol(f11, Decl(rangeTypeOperatorTypes.ts, 28, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let f12: number = c - d;
+>f12 : Symbol(f12, Decl(rangeTypeOperatorTypes.ts, 29, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let f13: (< 5) = d - a;
+>f13 : Symbol(f13, Decl(rangeTypeOperatorTypes.ts, 30, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f14: (<= 4) = d - b;
+>f14 : Symbol(f14, Decl(rangeTypeOperatorTypes.ts, 31, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let f15: number = d - c;
+>f15 : Symbol(f15, Decl(rangeTypeOperatorTypes.ts, 32, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let f16: number = d - d;
+>f16 : Symbol(f16, Decl(rangeTypeOperatorTypes.ts, 33, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let f17: (> -1) = a - 3;
+>f17 : Symbol(f17, Decl(rangeTypeOperatorTypes.ts, 35, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f18: (< 1) = 3 - a;
+>f18 : Symbol(f18, Decl(rangeTypeOperatorTypes.ts, 36, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let f19: (< 3) = c - 2;
+>f19 : Symbol(f19, Decl(rangeTypeOperatorTypes.ts, 37, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let f20: (> -3) = 2 - c;
+>f20 : Symbol(f20, Decl(rangeTypeOperatorTypes.ts, 38, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+
+let g1: (> 4) = a * a;
+>g1 : Symbol(g1, Decl(rangeTypeOperatorTypes.ts, 41, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let g2: (> 6) = a * b;
+>g2 : Symbol(g2, Decl(rangeTypeOperatorTypes.ts, 42, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let g3: number = a * c;
+>g3 : Symbol(g3, Decl(rangeTypeOperatorTypes.ts, 43, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let g4: number = a * d;
+>g4 : Symbol(g4, Decl(rangeTypeOperatorTypes.ts, 44, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let g5: (> 6) = b * a;
+>g5 : Symbol(g5, Decl(rangeTypeOperatorTypes.ts, 45, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let g6: (>= 9) = b * b;
+>g6 : Symbol(g6, Decl(rangeTypeOperatorTypes.ts, 46, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let g7: number = b * c;
+>g7 : Symbol(g7, Decl(rangeTypeOperatorTypes.ts, 47, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let g8: number = b * d;
+>g8 : Symbol(g8, Decl(rangeTypeOperatorTypes.ts, 48, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let g9: number = c * c;
+>g9 : Symbol(g9, Decl(rangeTypeOperatorTypes.ts, 49, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let g10: number = c * d;
+>g10 : Symbol(g10, Decl(rangeTypeOperatorTypes.ts, 50, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let g11: number = d * d;
+>g11 : Symbol(g11, Decl(rangeTypeOperatorTypes.ts, 51, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let g12: (> 4) = a * 2;
+>g12 : Symbol(g12, Decl(rangeTypeOperatorTypes.ts, 53, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let g13: (> 4) = 2 * a;
+>g13 : Symbol(g13, Decl(rangeTypeOperatorTypes.ts, 54, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let g14: (<= 42) = d * 6;
+>g14 : Symbol(g14, Decl(rangeTypeOperatorTypes.ts, 55, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let g15: (<= 42) = 6 * d;
+>g15 : Symbol(g15, Decl(rangeTypeOperatorTypes.ts, 56, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+
+let h1: (>= 0) = a / a;
+>h1 : Symbol(h1, Decl(rangeTypeOperatorTypes.ts, 59, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h2: (>= 0) = a / b;
+>h2 : Symbol(h2, Decl(rangeTypeOperatorTypes.ts, 60, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+
+let h3: number = a / c;
+>h3 : Symbol(h3, Decl(rangeTypeOperatorTypes.ts, 61, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let h4: number = a / d;
+>h4 : Symbol(h4, Decl(rangeTypeOperatorTypes.ts, 62, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let h5: (>= 0) = b / a;
+>h5 : Symbol(h5, Decl(rangeTypeOperatorTypes.ts, 63, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h6: number = b / c;
+>h6 : Symbol(h6, Decl(rangeTypeOperatorTypes.ts, 64, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let h7: number = b / d;
+>h7 : Symbol(h7, Decl(rangeTypeOperatorTypes.ts, 65, 3))
+>b : Symbol(b, Decl(rangeTypeOperatorTypes.ts, 1, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let h8: (< 2.5) = c / a;
+>h8 : Symbol(h8, Decl(rangeTypeOperatorTypes.ts, 66, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h9: number = c / c;
+>h9 : Symbol(h9, Decl(rangeTypeOperatorTypes.ts, 67, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let h10: number = c / d;
+>h10 : Symbol(h10, Decl(rangeTypeOperatorTypes.ts, 68, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+
+let h11: (< 3.5) = d / a;
+>h11 : Symbol(h11, Decl(rangeTypeOperatorTypes.ts, 69, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h12: number = d / c;
+>h12 : Symbol(h12, Decl(rangeTypeOperatorTypes.ts, 70, 3))
+>d : Symbol(d, Decl(rangeTypeOperatorTypes.ts, 3, 11))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
+let h13: (> 2) = a / 1;
+>h13 : Symbol(h13, Decl(rangeTypeOperatorTypes.ts, 72, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h14: (> 4) = a / 0.5;
+>h14 : Symbol(h14, Decl(rangeTypeOperatorTypes.ts, 73, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h15: (>= 0) & (< 0.5) = 1 / a;
+>h15 : Symbol(h15, Decl(rangeTypeOperatorTypes.ts, 74, 3))
+>a : Symbol(a, Decl(rangeTypeOperatorTypes.ts, 0, 11))
+
+let h16: number = 1 / c;
+>h16 : Symbol(h16, Decl(rangeTypeOperatorTypes.ts, 75, 3))
+>c : Symbol(c, Decl(rangeTypeOperatorTypes.ts, 2, 11))
+
