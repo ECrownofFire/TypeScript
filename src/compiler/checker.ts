@@ -11531,7 +11531,7 @@ namespace ts {
 
         function isRangeTypeRelatedTo(source: Type, target: RangeType, relation: Map<RelationComparisonResult>) {
             if (relation === comparableRelation) return true;
-            if (relation === assignableRelation || relation === definitelyAssignableRelation) {
+            if (relation === assignableRelation || relation === definitelyAssignableRelation || relation === subtypeRelation) {
                 if (source.flags & TypeFlags.Range) {
                     return isRangeContainedBy(<RangeType>source, target);
                 }
@@ -11542,7 +11542,6 @@ namespace ts {
             return false;
         }
 
-        // A range "contained" by another is essentially a subtype of it
         function isRangeContainedBy(source: RangeType, target: RangeType) {
             if (!source.min && target.min) return false;
             if (!source.max && target.max) return false;
